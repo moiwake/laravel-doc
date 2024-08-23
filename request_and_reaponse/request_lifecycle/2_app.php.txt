@@ -1,0 +1,37 @@
+🔵アプリケーションの作成
+$app = new Illuminate\Foundation\Application(
+    $_ENV['APP_BASE_PATH'] ?? dirname(__DIR__)
+);
+
+新しいLaravelアプリケーションのインスタンスを作成
+このアプリケーションインスタンスは、Laravelの様々なコンポーネントを結びつけ、
+システムのIoC（Inversion of Control）コンテナとして機能する。
+また、アプリケーションの基本パスを指定している。
+
+
+🔵重要なインターフェースのバインディング
+$app->singleton(
+    Illuminate\Contracts\Http\Kernel::class,
+    App\Http\Kernel::class
+);
+
+$app->singleton(
+    Illuminate\Contracts\Console\Kernel::class,
+    App\Console\Kernel::class
+);
+
+$app->singleton(
+    Illuminate\Contracts\Debug\ExceptionHandler::class,
+    App\Exceptions\Handler::class
+);
+
+重要なインターフェースをアプリケーションのIoCコンテナにバインドしている。
+これには、HTTPリクエストを処理するためのカーネル、コンソールコマンドを処理するためのカーネル、および例外処理のためのハンドラが含まれる。
+これらのバインディングは、後でこれらのクラスが必要になったときにアプリケーションが依存性注入を行えるようにする。
+
+
+🔵アプリケーションの返却:
+return $app;
+
+このスクリプトは、構築されたアプリケーションインスタンスを呼び出し元のスクリプトに返す。
+これにより、アプリケーションのインスタンス作成と設定がアプリケーションの実行とレスポンスの送信から分離される。

@@ -1,0 +1,109 @@
+https://readouble.com/laravel/9.x/ja/http-client.html
+
+
+
+🟡HTTPリクエストの操作
+
+・Laravelでフロントを実装していて、外部APIでデータの送受信をしている。
+・テストでHTTPリクエストを利用する。
+
+ー　前提
+Guzzleパッケージ（インストール：composer require guzzlehttp/guzzle）を使い、
+Illuminate\Support\Facades\Httpのファサードを使う。
+
+
+
+🔵リクエストの作成の基本
+リクエストは、Httpファサードが提供するhead、get、post、put、patch、deleteメソッドを使用する。
+
+例）
+use Illuminate\Support\Facades\Http;
+
+$response = Http::get('http://example.com');
+
+🟢レスポンス
+Httpファサードで作成したリクエストのレスポンスは、Illuminate\Http\Client\Responseクラスのインスタンス
+⇒Responseクラスに使用できるメソッドが使える。
+
+例）return Http::get('http://example.com/users/1')['name'];
+ガイド「リクエストの作成」
+
+🟢URLのパラメータを動的に設定する
+withUrlParameters()
+
+ガイド「URIテンプレート」　※URIテンプレートは、URL内のパラメータを動的に置換するための方法。
+
+🟢リクエストのデバッグ
+dd()
+HTTPリクエストに関する情報を確認できる。
+
+例）return Http::dd()->get('http://example.com');
+
+
+
+🔵いろいろなリクエストの作成
+
+🟢データの送信（POST、PUT、PATCH）
+２番目の引数としてデータの配列を渡す。
+※デフォルトでデータはapplication/jsonコンテンツタイプを使用して送信される。
+
+例）
+$response = Http::post('http://example.com/users', [
+    'name' => 'Steve',
+    'role' => 'Network Administrator',
+]);
+
+🟢クエリパラメータ
+クエリ文字列をURLに直接追加する　OR　キー／値ペアの配列をgetメソッドの２番目の引数に渡す。
+
+例）
+$response = Http::get('http://example.com/users', [
+    'name' => 'Taylor',
+    'page' => 1,
+]);
+
+🟢フォームから送信されたようなデータを送る
+＝フォームURLエンコードされたリクエスト（application/x-www-form-urlencodedコンテンツタイプを使用してデータを送信する）
+
+asForm()
+
+例）
+$response = Http::asForm()->post('http://example.com/users', [
+    'name' => 'Sara',
+    'role' => 'Privacy Consultant',
+]);
+
+🟢Bodyを指定して送る
+withBody()
+
+例）
+$response = Http::withBody(
+    base64_encode($photo), 'image/jpeg'　　コンテンツタイプは、２番目の引数で指定。
+)->post('http://example.com/photo');
+
+🟢マルチパートリクエスト
+⇒1つのリクエストで複数のデータ（テキストやファイルなど）を一度に送信する。（＊）
+
+attach()
+・ファイルの名前とその内容を引数渡す
+・必要に応じて、ファイル名を３番目の引数を指定
+
+例）
+$response = Http::attach(
+    'attachment', file_get_contents('photo.jpg'), 'photo.jpg'
+)->post('http://example.com/attachments');
+
+ストリームリソースを渡すこともできる。
+
+$photo = fopen('photo.jpg', 'r');
+$response = Http::attach(
+    'attachment', $photo, 'photo.jpg'
+)->post('http://example.com/attachments');
+
+＊マルチパートリクエスト
+通常のリクエストとは異なり、リクエストのBODYが複数のパートに分割され、
+各パートには、それぞれ異なる種類のデータが含まれており、各パートは識別子で区切られている。
+
+使用例）
+フォームの送信：フォームに入力されたテキストやファイルを一度にサーバーに送信する
+ファイルのアップロード：クライアントがサーバーにファイルをアップロードする（ファイルの内容やメタデータが複数のパートに分割され、一度に送信される。）

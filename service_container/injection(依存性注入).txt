@@ -1,0 +1,50 @@
+🟡依存性注入
+依存性注入（Dependency Injection）は、
+クラスやメソッドが他のクラスやオブジェクトを引数として受け取り、その依存性を外部から注入することで、
+依存性を自動的に解決する仕組み
+
+
+
+🔵コンストラクタインジェクション
+クラスのコンストラクタを使用して依存性を注入する方法
+
+class SomeClass
+{
+    protected $dependency;
+
+    public function __construct(SomeDependency $dependency)
+    {
+        $this->dependency = $dependency;
+    }
+}
+
+上記の例では、SomeClass のコンストラクタに SomeDependency のインスタンスが注入される。
+
+
+
+🔵メソッドインジェクション
+メソッドの引数として依存性を注入する方法
+
+class SomeClass
+{
+    public function someMethod(SomeDependency $dependency)
+    {
+        // メソッド内で $dependency を使用する
+    }
+}
+
+上記の例では、someMethod メソッドに SomeDependency のインスタンスが注入される。
+
+
+
+🔵メソッドの呼び出し時に手動で注入
+サービスコンテナを使用して手動で依存性を解決し、メソッドの呼び出し時に注入する方法
+
+ー　サービスプロバイダーで、クラスをサービスコンテナに登録
+ー　appファサードやコンテナのmakeメソッドを使用して、サービスコンテナにアクセスし、インスタンスを取得する
+
+$instance = app(SomeClass::class);
+$dependency = app(SomeDependency::class);
+$instance->someMethod($dependency);
+
+上記の例では、SomeClass のインスタンスを取得し、手動で SomeDependency のインスタンスを注入している。

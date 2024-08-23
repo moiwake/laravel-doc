@@ -1,0 +1,77 @@
+🟡Laravelのカーネル
+
+2種類ある
+１．HTTPカーネル
+２．Consoleカーネル
+
+それぞれのリクエストを処理するためのエントリーポイント
+
+🔵HTTPカーネル
+リクエストがアプリケーションに入ってきた時点からレスポンスが生成されるまでの一連の処理を制御する
+...ルーティング、ミドルウェア処理、ブートストラップの実行、エラー処理、ログ設定、アプリケーション動作環境の決定、そのほか実際にリクエストが処理される前に行う必要のあるタスク
+　...サービスプロバイダーのロードなど
+
+※ミドルウェア処理
+リクエストがアプリケーションに届く前に実行される一連のミドルウェア(リクエストの前処理や後処理、認証、セッション管理などの機能を提供)を管理する。
+
+
+①index.phpでhandleメソッドが呼び出される
+$kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
+
+$response = $kernel->handle(
+    $request = Illuminate\Http\Request::capture()
+);
+
+以下の処理が実行される。
+public function handle($request)
+{
+    try {
+        $request->enableHttpMethodParameterOverride();
+
+        $response = $this->sendRequestThroughRouter($request);　　受け取ったリクエストをsendRequestThroughRouterメソッドに渡す（以下参照）
+    } catch (Throwable $e) {
+        $this->reportException($e);　　例外をエラーハンドラに報告
+
+        $response = $this->renderException($request, $e);　エラーページやJSONレスポンスなど、クライアントに返すべきエラーメッセージを生成
+    }
+
+    $this->app['events']->dispatch(
+        new RequestHandled($request, $response)
+    );
+    　　RequestHandledイベント（HTTPリクエストが処理された後に発生するイベントで、通常はリクエストのログ記録やその他のアクションに使用される）を
+    　　ディスパッチしている
+
+    return $response;　　レスポンスを返す
+}
+
+
+protected function sendRequestThroughRouter($request)
+{
+    $this->app->instance('request', $request);
+
+    Facade::clearResolvedInstance('request');　　Facadeの解決済みインスタンスのキャッシュをクリア
+
+    $this->bootstrap();　　ブートストラップ処理を実行 ⇒　🟡bootstrap
+
+    return (new Pipeline($this->app))  パイプライン処理を開始
+                ->send($request)　　最初のミドルウェアにリクエストを送信
+                ->through($this->app->shouldSkipMiddleware() ? [] : $this->middleware)　　ミドルウェアのスタックを実行（$this->middleware はカーネルに登録されたミドルウェアのリスト）
+                ->then($this->dispatchToRouter());　　ルーターにリクエストをディスパッチする（ルーターへRequestが手渡される）
+}
+
+
+②index.phpでterminateメソッドが呼び出される
+$kernel->terminate($request, $response);
+
+public function terminate($request, $response)
+{
+    $this->terminateMiddleware($request, $response);　　ミドルウェアを終了する
+
+    $this->app->terminate();　　アプリケーション全体を終了する
+}
+
+
+🔵Consoleカーネル
+LaravelのArtisanコマンドラインツールは、Consoleカーネルを通じて実行される。
+
+※Consoleカーネルもミドルウェアの概念を採用しており、コマンドの前処理や後処理を実行できる。

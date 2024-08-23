@@ -1,0 +1,85 @@
+https://readouble.com/laravel/9.x/ja/requests.html
+
+
+
+🟡リクエスト
+HTTPメッセージ：クライアントとサーバー間で通信する際にやり取りされるデータの形式...HTTPプロトコルにおいて定義されている。
+⇒①リクエスト　②レスポンス
+
+【HTTPリクエストメッセージの例】
+GET /example HTTP/1.1
+Host: www.example.com
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:97.0) Gecko/20100101 Firefox/97.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Connection: keep-alive
+
+HTTPメソッド： GETなど
+URI： /example
+HTTPプロトコルバージョン：HTTP/1.1
+ヘッダー：リクエストに関する追加情報
+
+
+
+🔵リクエストへのアクセス
+
+HTTPリクエストのインスタンスを取得できる場所
+・コントローラ
+・ルート定義のクロージャー
+・ミドルウェア
+・サービスプロバイダー
+
+
+
+🔵リクエストのインスタンスに使用できるメソッド
+https://laravel.com/api/7.x/Illuminate/Http/Request.html
+
+🟢ヘッダの情報
+header()
+※bearerToken()：Bearerトークンを取得
+
+🟢IPアドレス
+ip()
+
+🟢コンテンツタイプ（HTML、XMLなど）
+ガイド「コンテントネゴシエーション」
+
+
+
+🔵HTTPメッセージの情報の取得・操作
+HTTPメッセージの情報を操作するインターフェースをPSR-7で定義している
+
+ガイド「PSR-7リクエスト」
+
+
+
+🔵入力情報の取得・操作
+ガイド「入力」
+
+ー　入力情報の保持
+セッションで、現在の入力情報を一時的に保持して、次にリクエストするときに使用できる。
+flash()、withInput()
+
+ガイド「直前の入力」
+
+※バリデーションを使用していれば、自動で保持される。
+...ガイド「フォームの再取得」
+https://readouble.com/laravel/9.x/ja/validation.html
+
+
+🔵クッキーを取得
+ガイド「クッキー」
+
+
+
+🔵空文字の置き換え
+デフォルトで、ミドルウェアによって、リクエストに含まれるすべての文字列フィールドから余分な空白を取り除き、nullに置き換える。
+⇒DB保存時に空文字ではなくnullが保存され、DBのカラムがNULL許容の場合に一貫性が保たれる。
+
+ー　無効化
+ガイド「入力ノーマライズの無効化」
+
+
+
+🔵ファイルデータ
+ガイド「ファイル」

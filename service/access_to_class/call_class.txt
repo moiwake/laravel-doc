@@ -1,0 +1,71 @@
+🟡呼び出しているクラス自身を参照する
+
+🔵$this
+メソッド内で呼び出した時、そのメソッドが呼び出されているオブジェクト（インスタンス）を参照する。
+⇒インスタンスのメソッド内で使用され、そのインスタンスのプロパティやメソッドにアクセスするために使われる。
+
+🔵static
+メソッド内で呼び出した時、そのメソッドが定義されているクラス自体を参照する。
+インスタンス化されていなくても使用できる。
+❗継承している場合は、継承先のクラスを参照する。
+
+
+🔵self
+メソッド内で呼び出した時、そのメソッドが定義されているクラス自体を参照する。
+インスタンス化されていなくても使用できる。
+❗継承している場合は、継承元のクラスを参照する。
+
+
+
+🟢$thisとstaticの違い
+class MyClass {
+    public static function staticMethod() {
+        return static::class;
+    }
+
+    public function instanceMethod() {
+        return $this->getClass();
+    }
+
+    protected function getClass() {
+        return static::class;
+    }
+}
+
+$myObject = new MyClass();
+echo $myObject->staticMethod(); // MyClass
+echo $myObject->instanceMethod(); // MyClass
+
+🟢staticとselfの違い
+
+ー　static
+class ParentClass {
+    public static $property = 'Parent';
+
+    public static function getProperty() {
+        return static::$property;
+    }
+}
+
+class ChildClass extends ParentClass {
+    public static $property = 'Child';
+}
+
+echo ParentClass::getProperty(); // 出力: Parent
+echo ChildClass::getProperty(); // 出力: Child
+
+ー　self
+class ParentClass {
+    public static $property = 'Parent';
+
+    public static function getProperty() {
+        return self::$property;
+    }
+}
+
+class ChildClass extends ParentClass {
+    public static $property = 'Child';
+}
+
+echo ParentClass::getProperty(); // 出力: Parent
+echo ChildClass::getProperty(); // 出力: Parent
