@@ -1,0 +1,156 @@
+https://readouble.com/laravel/9.x/ja/errors.html
+
+
+
+🟡例外処理
+App\Exceptions\Handlerクラス
+...アプリケーションが投げるすべての例外がログに記録され、ユーザーへレンダする
+
+
+
+🔵環境によってエラー情報を制御する
+本番環境...機密性の高い設定値がエンドユーザーに公開されるリスクがあるため、詳細なエラー情報やスタックトレースは非表示に設定する。
+
+ガイド「設定」
+
+
+
+🔵報告のカスタマイズ
+デフォルトでは、ログに記録される
+
+カスタマイズしたいとき
+・registerメソッドの中でreportableメソッドを定義
+public function register()
+{
+    $this->reportable(function (InvalidOrderException $e) {
+        //例外が報告可能であるかの条件を指定、具体的な報告処理
+    });
+}
+
+・respotメソッドのオーバーライド
+public function report(Throwable $exception)
+{
+    if ($exception instanceof CustomException) {
+        // 例外が発生した場合の報告処理（ログに記録など）
+    }
+
+    parent::report($exception);
+}
+
+※たぶん、本来の役割は「例外が報告可能であるかの条件を指定」のみだと思う。
+報告処理はreportメソッドの方でするべき？
+
+❗デフォルトのログ記録を停止したいときは、stopメソッドを使用するか、falseを返す。
+ガイド「例外のレポート」
+
+🟢報告しない例外の設定
+ガイド「タイプによる例外の無視」
+
+🟢reportメソッドでlarevelのデフォルトの挙動で処理したいとき
+ガイド「Reportable／Renderable例外」
+
+public function report()
+{
+    // 例外にカスタムレポートが必要かどうかを判定し、不要な場合は...
+    return false;
+}
+
+
+
+🔵ログのカスタマイズ
+
+🟢出力する情報
+ログの出力をカスタマイズしたいときは、contextメソッドをオーバーライドする。
+ガイド「グローバルログコンテキスト」
+⇒ログの出力例...[YYYY-MM-DD HH:MM:SS] production.ERROR: Something went wrong! {"exception": { /* 例外の詳細な情報 */, "foo": "bar" }}
+
+※特定の例外だけログ出力をカスタマイズしたいとき...カスタム例外のクラスにcontextメソッドを定義する。
+
+🟢ログレベル
+...error、warning、noticeなど
+ガイド「例外のログレベル」
+
+protected $levels = [
+    PDOException::class => LogLevel::CRITICAL,　　レベルを設定するクラス::レベルを設定するクラス
+    //他のクラスにもレベルを設定するときは、この配列に追加する
+];
+
+ガイド「ログレベル」
+https://readouble.com/laravel/9.x/ja/logging.html#log-levels
+
+
+
+🔵レンダリングのカスタマイズ
+デフォルトで、例外はHTTPレスポンスへ変換される。
+
+ガイド「例外のレンダ」
+
+カスタマイズしたいとき
+・registerメソッドの中でreportableメソッドを定義
+public function register()
+{
+    $this->renderable(function (NotFoundHttpException $e, $request) {
+        if ($request->is('api/*')) {
+            return response()->json([
+                'message' => 'Record not found.'
+            ], 404);
+        }
+    });
+}
+・respotメソッドのオーバーライド
+public function render($request)
+{
+    return response(/* ... */);
+}
+
+🟢renderメソッドでlarevelのデフォルトの挙動で処理したいとき
+ガイド「Reportable／Renderable例外」
+
+public function render()
+{
+    // 例外にカスタムレンダリングが必要かどうかを判定し、不要な場合は...
+    return false;
+}
+
+
+
+🔵処理を止めずに、エラー報告したい
+report()を使う
+ガイド「reportヘルパ」
+
+
+
+🔵エラーを発生させる
+abort()
+
+
+abor_if
+
+throw_if
+
+
+
+
+
+try-catch文で例外発生時に500以外のステータスコードを返したい
+通常、try-catch文で例外が発生したときには、500エラーが返される。
+⇒422など、指定のエラーコードを返したいとき
+
+
+
+
+
+
+
+
+
+
+
+
+🔵エラーページのカスタマイズ
+HTTPステータスコードのエラーページをカスタマイズする
+「カスタムHTTPエラーページ」
+
+🟢存在しないエラー発生時にレンダリングされるページ
+特定のHTTPステータスコードに対応するページが存在しない場合にレンダリングされるページを作成できる
+ガイド「HTTPエラーページのフォールバック」
