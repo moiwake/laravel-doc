@@ -1,0 +1,4 @@
+https://readouble.com/laravel/9.x/ja/filesystem.html
+
+Laravel Flysystem
+ローカルファイルシステム、SFTP、およびAmazonS3を操作するためのシンプルなドライバを提供している。
