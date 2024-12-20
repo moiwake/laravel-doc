@@ -1,0 +1,118 @@
+https://readouble.com/laravel/11.x/ja/mail.html
+
+通知の「メール通知」にも資料あり
+https://readouble.com/laravel/11.x/ja/notifications.html
+
+メール確認
+https://readouble.com/laravel/11.x/ja/verification.html
+
+🟡メール
+LaravelではSMTPやMailgun、Postmark、Amazon SESなど、さまざまなメールサービスが利用可能。
+
+
+
+🔵設定
+config/mail.php
+
+ー　ドライバ
+複数のメールサービスを設定し、用途に応じて使い分けることができる。
+APIベースのドライバ（Mailgun、Postmarkなど）は、SMTPよりも高速であるため、APIドライバが推奨される。
+
+ー　送信者の設定
+送信元のアドレスと送信者をグローバルに設定できる。（Mailableクラスで定義する必要がなくなる。）
+
+
+
+🔵Mailable
+
+🟢Markdown
+「Markdown Mailable」
+
+
+
+🟢受信者をループする
+場合によっては、受信者/電子メールアドレスの配列を反復処理して、受信者のリストにMailableファイルを送信する必要が起きるでしょう。しかし、toメソッドはメールアドレスをMailable受信者のリストに追加するため、ループを繰り返すたびに、以前のすべての受信者に別のメールが送信されます。したがって、受信者ごとにMailableインスタンスを常に再作成する必要があります。
+
+foreach (['taylor@example.com', 'dries@example.com'] as $recipient) {
+    Mail::to($recipient)->send(new OrderShipped($order));
+}
+
+
+
+🟢メールメッセージの配信を遅らせたい場合：laterメソッド
+Mail::to($request->user())
+    ->cc($moreUsers)
+    ->bcc($evenMoreUsers)
+    ->later(now()->addMinutes(10), new OrderShipped($order));
+
+
+
+🟢メールメッセージのキュー投入
+
+Mail::to($request->user())
+    ->cc($moreUsers)
+    ->bcc($evenMoreUsers)
+    ->queue(new OrderShipped($order));
+
+
+ー　特定のキュー
+$message = (new OrderShipped($order))
+    ->onConnection('sqs')
+    ->onQueue('emails');
+
+Mail::to($request->user())
+    ->cc($moreUsers)
+    ->bcc($evenMoreUsers)
+    ->queue($message);
+
+
+ー　常にキューに入れたいMailableクラスがある時
+implements ShouldQueue
+
+❗️Mailableのキュー投入とデータベーストランザクション
+設定（after_commitをtureに）か、afterCommitメソッドを使用すると、
+キュー投入されたMailableがDBトランザクション内でディスパッチされた時、トランザクションがコミットされる前にメールが送らないようにできる。
+
+
+
+🟢ブラウザによるMailableのプレビュー
+Mailableのテンプレートを設計するときは、通常のBladeテンプレートのように、レンダ済みMailableをブラウザですばやくプレビューできると便利です。このためLaravelでは、ルートクロージャまたはコントローラから直接Mailableを返せます。Mailableが返されると、ブラウザでレンダされ表示されるため、実際の電子メールアドレスへ送信しなくても、デザインをすばやくプレビューできます。
+
+Route::get('/mailable', function () {
+    $invoice = App\Models\Invoice::find(1);
+
+    return new App\Mail\InvoicePaid($invoice);
+});
+
+
+
+🟢ロケール設定
+「Mailableの多言語化」
+
+
+
+🟢メールのテスト
+「Testing」
+
+
+
+🟢ローカル開発で実際に送信したくないとき
+「メールとローカル開発」
+
+
+
+🟢イベント
+メール送信時のイベントをリッスンできる。
+
+
+
+🟢Laravelがサポートしていないサービスを使いたいとき
+「カスタムトランスポート」
+
+
+
+🔵メール確認
+本人確認のメールなど
+
+メールアドレスの確認をする機能が組み込まれている。
+https://readouble.com/laravel/11.x/ja/verification.html

@@ -1,0 +1,138 @@
+https://readouble.com/laravel/11.x/ja/notifications.html
+
+🟡通知
+Laravelではメール、SMS（Vonage）、Slack、データベースなど、さまざまなチャンネルで通知を送信できる。
+
+🔵通知の送信
+トレイトとファサードの２通りがある。
+
+
+
+🟢Notifiableトレイトのnotifyメソッド
+どのモデルでもNotifiableトレイトを使用可能。
+
+use App\Notifications\InvoicePaid;
+
+$user->notify(new InvoicePaid($invoice));
+
+※App\Models\Userモデルにはデフォルトで含まれている。
+
+
+
+🟢Notificationファサード
+ユーザーのコレクションなど、複数の送信をしたいときに便利。
+
+use Illuminate\Support\Facades\Notification;
+
+Notification::send($users, new InvoicePaid($invoice));
+
+
+
+🟢何で通知するか
+viaメソッド
+配信チャンネルを指定できる・・・mail、database、broadcast、vonage、slackチャンネル
+
+/**
+ * 通知の配信チャンネルを取得
+ *
+ * @return array<int, string>
+ */
+public function via(object $notifiable): array
+{
+    return $notifiable->prefers_sms ? ['vonage'] : ['mail', 'database'];
+}
+
+
+
+🟢通知をキューに入れる
+通知クラスにShouldQueueインターフェイスとQueueableトレイトを追加する。
+配信を遅らせる場合はdelayメソッドを使用する。
+
+ー　キューに入っていてもすぐに通知したい
+sendNowメソッドを使う。
+
+Notification::sendNow($developers, new DeploymentCompleted($deployment));
+
+
+
+🟢通知を指定時間後に送信する
+
+①delayメソッド
+$delay = now()->addMinutes(10);
+$user->notify((new InvoicePaid($invoice))->delay($delay));
+
+ー　特定のチャンネルごとに指定する
+
+$user->notify((new InvoicePaid($invoice))->delay([
+    'mail' => now()->addMinutes(5),
+    'sms' => now()->addMinutes(10),
+]));
+
+②withDelayメソッド
+NotificationクラスにwithDelayメソッドを定義する。
+
+/**
+ * 通知の送信遅延を決める
+ *
+ * @return array<string, \Illuminate\Support\Carbon>
+ */
+public function withDelay(object $notifiable): array
+{
+    return [
+        'mail' => now()->addMinutes(5),
+        'sms' => now()->addMinutes(10),
+    ];
+}
+
+
+
+🟢その他キューに関するガイド
+・通知キュー接続のカスタマイズ
+・通知チャンネルキューのカスタマイズ
+・キュー投入する通知
+・キュー投入する通知とデータベーストランザクション
+・キュー投入した通知を送信するか判定・・・キュー投入後に送信するかどうかの制御をする。
+
+
+
+🟢ユーザー登録されていないユーザーに送信したい
+オンデマンド通知：アプリケーションの「ユーザー」として保存されていない人（例: ゲストユーザーや外部の連絡先）に送信する場合に使用する。
+「オンデマンド通知」
+
+
+
+🔵リアルタイムで通知する
+
+🟢ブロードキャスト通知
+リアルタイムで通知をフロントエンド（JavaScriptクライアント）に送信できる。
+「ブロードキャスト通知」
+
+
+
+🟢SMS通知
+「SMS通知」
+
+
+
+🟢Slack通知
+「Slack通知」
+
+
+
+🟢通知のローカライズ
+「通知のローカライズ」
+
+
+
+🟢テスト
+「テスト」
+
+
+
+🟢通知イベント
+「通知イベント」
+
+
+
+🟢通知チャンネルのカスタマイズ
+「カスタムチャンネル」

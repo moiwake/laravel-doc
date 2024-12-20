@@ -1,0 +1,59 @@
+https://readouble.com/laravel/11.x/ja/vite.html
+
+🟡Vite（ヴィート）
+フロントエンド開発のための最新のビルドツール。
+
+ー　特徴
+フロントエンドの開発をする上で必要なセットアップの作業が格段に少なくなり、効率的な開発ができる。
+　・アプリケーションが簡単に作成できる。（開発サーバーの提供もある。）
+　・デフォルトの設定のままで、TypeScript、JSX、CSS などがすぐに使えるようになる。（使用するためのツールの導入や設定が不要になる。）
+　参考：https://zenn.dev/comm_vue_nuxt/articles/what-is-vite
+
+
+※LaravelとViteの統合
+Laravelは、Viteを簡単に利用できるように公式プラグインを提供しており、Bladeで@viteディレクティブを使うことで、Viteのアセットを簡単に読み込むことができる。
+
+
+
+🔵Viteの設定
+Viteの設定ファイル：vite.config.js
+エントリーポイント（CSSやJavaScriptファイル）を指定する。
+
+import { defineConfig } from 'vite';
+import laravel from 'laravel-vite-plugin';
+
+export default defineConfig({
+    plugins: [
+        laravel([
+            'resources/css/app.css',
+            'resources/js/app.js',
+        ]),
+    ],
+});
+
+
+
+❗️Viteを使用して、アプリケーションのHTML、CSS、JSアセットを参照する場合の注意点
+
+[URL処理]
+絶対パスでアセットを参照した場合、Viteはそのアセットをビルドに含めない。
+→相対パス（参照するファイルからの相対）で指定する。
+　→Viteによって書き直され、バージョン付けされ、バンドルされる。
+
+例）ディレクトリ構造
+public/
+  taylor.png
+resources/
+  js/
+    Pages/
+      Welcome.vue
+  images/
+    abigail.png
+
+<!-- このアセットをViteは扱わず、バンドルへ含まれない -->
+<img src="/taylor.png">
+
+<!-- このアセットは書き換えられ、バージョン付けし、バンドルへ含まれる -->
+<img src="../../images/abigail.png">
+
+
